@@ -1,15 +1,18 @@
 package cmd
 
 import (
-	"context"
 	"fmt"
 	"log"
+	"os"
 
-	"github.com/comeonjy/upic/config"
 	"github.com/comeonjy/upic/pkg"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
+
+var QiniuAK = os.Getenv("QINIU_AK")
+var QiniuSK = os.Getenv("QINIU_SK")
+var QiniuCDN = os.Getenv("QINIU_CDN")
 
 var uploadCmd = &cobra.Command{
 	Use:   "up",
@@ -20,16 +23,16 @@ var uploadCmd = &cobra.Command{
 			log.Println("请输入文件名")
 			return
 		}
-		conf := config.NewConfig(context.Background())
 		var url string
 		var err error
 		switch viper.GetString("oss") {
 		case "qiniu":
-			client := pkg.NewQiNiu(conf.Get().QiniuAK, conf.Get().QiniuSK, conf.Get().QiniuCDN)
+			client := pkg.NewQiNiu(QiniuAK, QiniuSK, QiniuCDN)
 			url, err = client.Upload(args[0])
 		}
 		if err != nil {
-			log.Println(cmd.Context(), "Update pic err:%v", err)
+			log.Println("Update pic err:", err)
+			return
 		}
 		log.Println("上传成功", url)
 		log.Println("Markdown", fmt.Sprintf("![](%s)", url))
